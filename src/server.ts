@@ -1,5 +1,5 @@
-import express, { Application, Request, Response } from "express";
-import reportsRoutes from "./Routes/reportRoutes";
+import express,  { Application } from "express";
+import reportsRoutes from "./Routes/reportsRoutes";
 import helmet from "helmet";
 import cors from "cors";
 import rateLimit from "express-rate-limit";
@@ -20,8 +20,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 //Routes
-reportsRoutes(app)
-
+reportsRoutes(app);
 
 try {
     app.listen(port, (): void => {

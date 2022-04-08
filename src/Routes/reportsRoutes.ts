@@ -1,22 +1,21 @@
 import { Application, Request, Response, NextFunction } from "express";
 import ReportsController from "../Controllers/ReportsController";
-import expressValidator, { body, check, sanitizeBody, validationResult } from "express-validator";
+import { body, validationResult } from "express-validator";
 
 /**
  * Routes for /reports endpoint.
  * @param {Express.Application} app 
  */
 export default function reportsRoutes(app: Application) {
-    //Get
     app.get(
         "/reports/:category?",
         (req: Request, res: Response) => {
-            let categoryInput = req.params.category;
+            let category = req.params.category;
             let controller = new ReportsController();
-            let reportByCategory = controller.getReports(categoryInput);
+            let reports = controller.getReportsByCategory(category);
 
-            if (reportByCategory) {
-                return res.status(200).json(reportByCategory);
+            if (reports) {
+                return res.status(200).json(reports);
             } else {
                 return res.status(500).json({
                     message: 'An internal error has occurred.'
@@ -25,10 +24,10 @@ export default function reportsRoutes(app: Application) {
         }
     );
 
-    //Post
     app.post(
         "/report",
-        validatePostBody, (req: Request, res: Response, next: NextFunction) => {
+        validatePostBody,
+        (req: Request, res: Response, next: NextFunction) => {
             //Check middleware errors.
             let errors = validationResult(req);
             let qntErrors = errors.array().length;
@@ -41,7 +40,7 @@ export default function reportsRoutes(app: Application) {
                 })
             }
         },
-        (req: Request, res: Response, next: NextFunction) => {
+        (req: Request, res: Response) => {
             let controller = new ReportsController();
             let addReport = controller.addReport(req.body);
 
@@ -55,7 +54,7 @@ export default function reportsRoutes(app: Application) {
         }
     );
 
-};
+}
 
 const validatePostBody = [
     body("title").isString().isLength({ max: 255 }),

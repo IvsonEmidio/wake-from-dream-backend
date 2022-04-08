@@ -1,4 +1,4 @@
-import { IReportPostParameters } from "../../../Interfaces/IReportStrategy";
+import { IReportPostParameters } from "../../../Interfaces/IReports";
 import IReportStrategy from "../../StrategyInterfaces/IReportsStrategy";
 
 export default class AmericanStrategy implements IReportStrategy {
