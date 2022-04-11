@@ -1,16 +1,26 @@
+import { allowedEvents } from "../../Controllers/ReportsController";
 import pool from "../../Database/pool";
 
 describe("check whether we can get a report by id", () => {
     test("should get an report by ID from database", async () => {
         //Set
         let reportId = 107;
+        let events = "";
+        allowedEvents.forEach((item, i) => {
+            if (i === 0) {
+                events = events + item;
+            } else {
+                events = events + ", " + item;
+            }
+        });
+
+
         let query = `
             SELECT title, date, category_id, author_id,
             reports_categories.name AS category_name,
             reports_authors.name AS author_name, reports_authors.nationality AS author_nationality,
-            full_text, final_things, lights, out_of_body, seen_spirits, tunnel_vision, watched_life_movie,
-            feel_peace_and_love, dont_want_come_back, no_more_death_fear, seen_death_parents, other_dimension, 
-            need_finish_mission
+            full_text, final_things,
+            ${events}
             FROM     reports
             JOIN     reports_categories
             ON       reports_categories.id = category_id
@@ -51,6 +61,6 @@ describe("check whether we can get a report by id", () => {
             watched_life_movie: false,
         }
 
-        expect(response.rows[0]).toStrictEqual(expectedResponse)
+        expect(response.rows[0]).toStrictEqual(expectedResponse);
     });
 });

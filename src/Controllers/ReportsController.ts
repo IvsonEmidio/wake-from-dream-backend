@@ -1,19 +1,15 @@
-import pool from "../Database/pool";
-import Reports from "../Domain/ReportsContext";
 import {
-    IReportEventsObj,
     IReportPostParameters,
 } from "../Interfaces/IReports";
 import {
     body,
     check,
-    Result,
+    param,
     ValidationChain,
     validationResult,
 } from "express-validator";
 import { Request, Response } from "express";
 import ReportsService from "../Services/ReportsService";
-import { parseEventsArrayToObject } from "../Helpers/arrayManipulation";
 
 export default class ReportsController {
     reportsService: ReportsService;
@@ -41,10 +37,10 @@ export default class ReportsController {
 
             let data: IReportPostParameters = req.body;
             let dbOperation = await this.reportsService.createSingleReport(data);
-            if (dbOperation.done) {
+            if (dbOperation.success) {
                 return res.status(200).json({
                     status: 1,
-                    message: 'New report sucessfully created on database',
+                    message: 'New report successfully created on database',
                     data: {
                         id: dbOperation.newId
                     }
@@ -65,21 +61,60 @@ export default class ReportsController {
         }
     }
 
-    public validateBody(method: string): Array<ValidationChain> {
-        const allowedEvents: Array<string> = [
-            "lights",
-            "out_of_body",
-            "seen_spirits",
-            "tunnel_vision",
-            "watched_life_movie",
-            "feel_peace_and_love",
-            "dont_want_come_back",
-            "no_more_death_fear",
-            "seen_death_parents",
-            "other_dimension",
-            "need_finish_mission",
-        ];
+    public async getReport(req: Request, res: Response) {
+        try {
+            const errors = validationResult(req);
 
+            if (!errors.isEmpty()) {
+                return res.status(400).json({
+                    status: 0,
+                    message: "Check the fields and try again...",
+                    errors: errors
+                });
+            }
+
+            let reportId = parseInt(req.params.id);
+            let dbOperation = await this.reportsService.getSingleReport(reportId);
+            if (dbOperation.success) {
+                res.status(200).json({
+                    status: 1,
+                    message: "Success",
+                    data: dbOperation.data
+                })
+            } else {
+                let errorMsg = dbOperation.errors?.message;
+                let statusCode: number = 500;
+                if (errorMsg === "The report has not found, please, check the id and try again.") {
+                    statusCode = 404;
+                }
+
+                res.status(statusCode).json({
+                    status: 0,
+                    errors: dbOperation.errors
+                })
+            }
+        } catch (err) {
+            return res.status(500).json({
+                status: 0,
+                errors: {
+                    message: "An unknown error has occurred, please, try again later",
+                }
+            })
+        }
+    }
+
+    public validateParams(method: string): Array<ValidationChain> {
+        switch (method) {
+            case "getReport":
+                return [
+                    param('id', 'the report id need to be an integer.').isInt()
+                ];
+            default:
+                return []
+        }
+    }
+
+    public validateBody(method: string): Array<ValidationChain> {
         switch (method) {
             case "createReport":
                 return [
@@ -107,3 +142,17 @@ export default class ReportsController {
         }
     }
 }
+
+export const allowedEvents: Array<string> = [
+    "lights",
+    "out_of_body",
+    "seen_spirits",
+    "tunnel_vision",
+    "watched_life_movie",
+    "feel_peace_and_love",
+    "dont_want_come_back",
+    "no_more_death_fear",
+    "seen_death_parents",
+    "other_dimension",
+    "need_finish_mission",
+];

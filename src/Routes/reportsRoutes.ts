@@ -15,7 +15,8 @@ export default function reportsRoutes(app: Application) {
     );
 
     app.get(
-        '/report/{id}',
-
-    )
+        '/report/:id',
+        controller.validateParams('getReport'),
+        controller.getReport.bind(controller)
+    );
 }

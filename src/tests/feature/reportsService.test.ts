@@ -23,7 +23,7 @@ describe('Test whether a new record has created on database', () => {
 
 
     //Assert
-    expect(response.done).toBeTruthy();
+    expect(response.success).toBeTruthy();
   })
 });
 
@@ -48,6 +48,6 @@ describe('Test whether a new record has rejected on database', () => {
     let response = await service.createSingleReport(testingData);
 
     //Assert
-    expect(response.done).toBeFalsy();
+    expect(response.success).toBeFalsy();
   })
 });

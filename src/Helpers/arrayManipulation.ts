@@ -35,3 +35,21 @@ export function parseEventsArrayToObject(events: Array<string>): IReportEventsOb
         need_finish_mission: isStringOnArray('need_finish_mission', events)
     }
 }
+
+/**
+ * Parses an array of strings in a single line query string.
+ * it are useful for creating query's from arrays
+ * @param {Array<string>} array 
+ */
+export function parseArrayToQueryStringLine(array: Array<string>): string {
+    let response = "";
+    array.forEach((item, i) => {
+        if (i === 0) {
+            response = response + item;
+        } else {
+            response = response + ", " + item;
+        }
+    });
+
+    return response;
+}
