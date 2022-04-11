@@ -69,7 +69,7 @@ export default class ReportsController {
                 return res.status(400).json({
                     status: 0,
                     message: "Check the fields and try again...",
-                    errors: errors
+                    errors: errors.array()
                 });
             }
 
