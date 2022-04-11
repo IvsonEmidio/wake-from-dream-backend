@@ -52,8 +52,7 @@ export default class ReportsController {
             } else {
                 return res.status(500).json({
                     status: 0,
-                    message: 'An error has occurred when creating a new report on database ' +
-                        'check the fields and try again...',
+                    message: 'An error has occurred when creating a new report on database',
                     errors: dbOperation.errors
                 });
             }
