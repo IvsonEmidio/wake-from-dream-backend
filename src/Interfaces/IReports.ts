@@ -21,3 +21,22 @@ export interface IReportEventsObj {
     other_dimension: boolean,
     need_finish_mission: boolean
 }
+
+export interface IReportItemDetails {
+    title: string,
+    date: Date,
+    category_info: {
+        category_id: number,
+        category_name: string
+    },
+    author_info: {
+        author_id: number,
+        author_name: string,
+        author_nationality: string | null
+    },
+    texts: {
+        full_text: string,
+        final_things: string | null
+    },
+    events: IReportEventsObj
+}
