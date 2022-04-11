@@ -48,15 +48,17 @@ export default class ReportsController {
             } else {
                 return res.status(500).json({
                     status: 0,
-                    message: 'An error has occurred when creating a new report on database',
-                    errors: dbOperation.errors
+                    errors: {
+                        message: 'An error has occurred when creating a new report on database',
+                    }
                 });
             }
         } catch (err) {
             res.status(500).json({
                 status: 0,
-                message: "An unknown error has occurred when validating the fields.",
-                errors: err,
+                errors: {
+                    message: "An unknown error has occurred when validating the fields.",
+                }
             });
         }
     }
