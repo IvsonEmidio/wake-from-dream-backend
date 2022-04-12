@@ -132,7 +132,7 @@ describe('Test whether a user can delete an report', () => {
     //Assert
     let expectedResponse = {
       success: true,
-      found: true,
+      found: false,
     }
 
     expect(response).toStrictEqual(expectedResponse);
