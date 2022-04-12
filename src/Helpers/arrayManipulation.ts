@@ -16,7 +16,7 @@ export function isStringOnArray(needle: string, haystack: Array<string>): boolea
 
 /**
 * Parses array of events in object with boolean values.
-* Only itens in array will be true, all others will be false.
+* Only items in array will be true, all others will be false.
 * @param {Array<string>} events
 * @returns {IReportEventsObj}
 */
