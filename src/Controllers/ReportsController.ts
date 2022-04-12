@@ -63,6 +63,11 @@ export default class ReportsController {
         }
     }
 
+    /**
+     * Get a single report details by ID.
+     * @param {Request} req 
+     * @param {Response} res 
+     */
     public async getReport(req: Request, res: Response) {
         try {
             const errors = validationResult(req);
@@ -104,6 +109,7 @@ export default class ReportsController {
             })
         }
     }
+
 
     public validateParams(method: string): Array<ValidationChain> {
         switch (method) {
