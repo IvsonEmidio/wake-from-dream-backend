@@ -167,6 +167,43 @@ export default class ReportsService {
     }
 
     /**
+     * Deletes a single report by ID.
+     * @param {number} id 
+     */
+    public async deleteSingleReport(id: number): Promise<{
+        success: boolean,
+        found: boolean
+    }> {
+        let query = `DELETE FROM reports WHERE id = $1`;
+        let queryValues = [id];
+
+        return pool.query(query, queryValues)
+            .then((result) => {
+                let qntRows = result.rowCount;
+
+                if (qntRows > 0) {
+                    return {
+                        success: true,
+                        found: true
+                    }
+                } else {
+                    return {
+                        success: true,
+                        found: false
+                    }
+                }
+            })
+            .catch(() => {
+                return {
+                    success: false,
+                    found: false
+                }
+            });
+
+    }
+
+
+    /**
      * Get an instance of IReportsStrategy Interface -
      * according to report category name.
      * @param {string} category

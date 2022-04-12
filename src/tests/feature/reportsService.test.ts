@@ -120,3 +120,22 @@ describe('Test whether the report has not found', () => {
     expect(response).toStrictEqual(expectedResponse);
   })
 })
+
+describe('Test whether a user can delete an report', () => {
+  test('Should delete an report by ID', async () => {
+    //Set
+    let reportId = 516;
+
+    //Act
+    let response = await service.deleteSingleReport(reportId);
+
+    //Assert
+    let expectedResponse = {
+      success: true,
+      found: true,
+    }
+
+    expect(response).toStrictEqual(expectedResponse);
+
+  })
+})

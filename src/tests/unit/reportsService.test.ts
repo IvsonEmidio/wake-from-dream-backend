@@ -64,3 +64,67 @@ describe("check whether we can get a report by id", () => {
         expect(response.rows[0]).toStrictEqual(expectedResponse);
     });
 });
+
+describe("Check whether we can delete a report by id", () => {
+    test("Should delete a report by ID", async () => {
+        //Set
+        let reportID = 277;
+        let query = `DELETE FROM reports WHERE id = $1`;
+        let queryValues = [reportID];
+
+
+        //Act
+        let response = await pool.query(query, queryValues)
+            .then(() => {
+                return {
+                    success: true,
+                }
+            })
+            .catch(() => {
+                return {
+                    success: false,
+                }
+            });
+
+        //Assert
+        let expectResponse = {
+            success: true
+        }
+
+        expect(response).toStrictEqual(expectResponse);
+    })
+});
+
+
+describe("Check whether we can return an error on invalid report ID", () => {
+    test("Should return an error when deleting a report ID", async () => {
+        //Set
+        let reportID = "random";
+        let query = `DELETE FROM reports WHERE id = $1`;
+        let queryValues = [reportID];
+
+
+        //Act
+        let response = await pool.query(query, queryValues)
+            .then(() => {
+                return {
+                    success: true,
+                    random: true
+                }
+            })
+            .catch(() => {
+                return {
+                    success: false,
+                    random: false
+                }
+            });
+
+        //Assert
+        let expectResponse = {
+            success: false,
+            random: false
+        }
+
+        expect(response).toStrictEqual(expectResponse);
+    })
+});

@@ -19,4 +19,11 @@ export default function reportsRoutes(app: Application) {
         controller.validateParams('getReport'),
         controller.getReport.bind(controller)
     );
+
+    app.delete(
+        '/report/:id',
+        controller.validateParams('deleteReport'),
+        controller.deleteReport.bind(controller)
+    )
+
 }

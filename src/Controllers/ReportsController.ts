@@ -110,6 +110,50 @@ export default class ReportsController {
         }
     }
 
+    /**
+     * Delete a single report by ID.
+     * @param {Request} req 
+     * @param {Response} res 
+     */
+    public async deleteReport(req: Request, res: Response) {
+        try {
+            let errors = validationResult(req);
+            if (!errors.isEmpty()) {
+                return res.status(400).json({
+                    status: 0,
+                    message: "Check the fields and try again...",
+                    errors: errors.array()
+                });
+            }
+
+            let reportId = parseInt(req.params.id);
+            let code: number = 200;
+            let message: string = "Successfully deleted the report.";
+            let dbOperation = await this.reportsService.deleteSingleReport(reportId);
+            let { success, found } = dbOperation;
+
+            if (success) {
+                if (!found) {
+                    message = "The report id has not encountered, please, check the field 'id' and try again.";
+                    code = 404;
+                }
+            } else {
+                message = "Unfortunately an error has occurred on database, please, try again later."
+                code = 500;
+            }
+
+            return res.status(code).json({
+                status: success ? 1 : 0,
+                message
+            });
+
+        } catch (err) {
+            return res.status(500).json({
+                status: 0,
+                message: "An unknown error has occurred, please, try again later."
+            });
+        }
+    }
 
     public validateParams(method: string): Array<ValidationChain> {
         switch (method) {
@@ -117,6 +161,10 @@ export default class ReportsController {
                 return [
                     param('id', 'the report id need to be an integer.').isInt()
                 ];
+            case "deleteReport":
+                return [
+                    param('id', 'the report id need to be an integer.').isInt()
+                ]
             default:
                 return []
         }
