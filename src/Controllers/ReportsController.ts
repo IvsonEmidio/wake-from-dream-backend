@@ -143,7 +143,7 @@ export default class ReportsController {
             }
 
             return res.status(code).json({
-                status: success ? 1 : 0,
+                status: found ? 1 : 0,
                 message
             });
 
