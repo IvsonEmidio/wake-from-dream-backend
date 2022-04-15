@@ -2,40 +2,42 @@ import { Application } from "express";
 import ReportsController from "../Controllers/ReportsController";
 
 /**
- * Routes for /report endpoint.
+ * Routes for /report and /reports endpoint.
  * @param {Express.Application} app
  */
 export default function reportsRoutes(app: Application) {
     const controller = new ReportsController();
 
+    app.get(
+        '/reports/:page',
+        controller.validateParams('all'),
+        controller.getAllReports.bind(controller),
+    );
+
     app.post(
-        "/report",
-        controller.validateBody("createReport"),
+        '/report',
+        controller.validateBody('create'),
         controller.createReport.bind(controller)
     );
 
     app.get(
-        "/report/:id",
-        controller.validateParams("getReport"),
+        '/report/:id',
+        controller.validateParams('get'),
         controller.getReport.bind(controller)
     );
 
     app.delete(
-        "/report/:id",
-        controller.validateParams("deleteReport"),
+        '/report/:id',
+        controller.validateParams('delete'),
         controller.deleteReport.bind(controller)
     );
 
     app.put(
-        "/report/:id",
-        controller.validateBody("updateReport"),
-        controller.validateParams("updateReport"),
+        '/report/:id',
+        controller.validateBody('update'),
+        controller.validateParams('update'),
         controller.updateReport.bind(controller)
     );
 
-    app.get(
-        "/reports/:pageNum",
-        controller.validateParams('getAllReports'),
-        controller.getAllReports.bind(controller),
-    );
+
 }
