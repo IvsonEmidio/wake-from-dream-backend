@@ -1,8 +1,10 @@
 import { allowedEvents } from "../../../Controllers/ReportsController";
 import pool from "../../../Database/pool";
+import { parseArrayToQueryStringLine } from "../../../Helpers/arrayManipulation";
 import {
   parseEventsObjToQueryValues,
   parseObjToUpdateQueryItems,
+  parseRowObjToResponseObj,
 } from "../../../Helpers/objectManipulation";
 
 describe("check whether we can get a report by id", () => {
@@ -268,3 +270,52 @@ describe("Check whether we can update an report by ID", () => {
     expect(t3DbOperation).toStrictEqual(expectedResponse);
   });
 });
+
+describe("Check whether we can get all reports details with pagination", () => {
+  test("Should return all reports details", async () => {
+    //TODO - Test this.
+    let data = {
+      page: 1,
+      itemsPerPage: 50
+    };
+
+    let eventsColumns = parseArrayToQueryStringLine(allowedEvents);
+    let query = `
+    SELECT reports.id, title, date, category_id, author_id,
+    reports_categories.name AS category_name,
+    reports_authors.name AS author_name,
+    reports_authors.nationality AS author_nationality,
+    full_text, final_things, ${eventsColumns}
+    FROM reports
+    JOIN reports_categories
+    ON reports_categories.id = reports.category_id
+    JOIN reports_authors
+    ON reports_authors.id = reports.author_id
+    JOIN reports_texts
+    ON reports_texts.report_id = reports.id
+    JOIN reports_events
+    ON reports_events.report_id = reports.id
+    ORDER BY reports.id
+    LIMIT $2
+    OFFSET ($1 - 1) * $2;`;
+    let values = [data.page, data.itemsPerPage];
+    let response = await pool.query(query, values).then((result) => {
+      let array = result.rows.map(row => {
+        return parseRowObjToResponseObj(row);
+      });
+
+      if (array.length === 50) {
+        return {
+          success: true
+        }
+      }
+    });
+
+    let expectedResponse = {
+      success: true
+    };
+
+    expect(response).toStrictEqual(expectedResponse);
+
+  })
+})

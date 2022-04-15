@@ -6,6 +6,7 @@ import {
   body,
   check,
   param,
+  query,
   ValidationChain,
   validationResult,
 } from "express-validator";
@@ -224,6 +225,55 @@ export default class ReportsController {
     }
   }
 
+  /**
+   * Get all reports
+   */
+  public async getAllReports(
+    req: Request,
+    res: Response
+  ) {
+    try {
+      let errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.status(400).json({
+          status: 0,
+          message: "Check the fields and try again...",
+          errors: errors.array(),
+        });
+      }
+
+      let page = parseInt(req.params.pageNum);
+      let itemsPerPage = 50;
+      let result = {
+        statusCode: 200,
+        message: 'Successfully found report items',
+      };
+
+      let dbOperation = await this.reportsService.getAllReports(page, itemsPerPage);
+      let { success, data } = dbOperation;
+      if (success && data.length === 0) {
+        result.statusCode = 404;
+        result.message = 'No results found, check your query and try again.';
+      } else if (!success) {
+        result.statusCode = 500;
+        result.message = 'An error has occurred, please try again later.';
+      }
+
+      return res.status(result.statusCode).json({
+        status: success ? 1 : 0,
+        message: result.message,
+        qntItems: data ? data.length : 0,
+        data
+      });
+
+    } catch (err) {
+      return res.status(500).json({
+        status: 0,
+        message: 'An unknown error has occurred, please, try again later.',
+      });
+    }
+  }
+
   public validateParams(method: string): Array<ValidationChain> {
     switch (method) {
       case "getReport":
@@ -232,6 +282,8 @@ export default class ReportsController {
         return [param("id", "the report id need to be an integer.").isInt()];
       case "updateReport":
         return [param("id", "the report id need to be an integer.").isInt()];
+      case "getAllReports":
+        return [param("pageNum", "PageNum needs to be an valid integer.").isInt()];
       default:
         return [];
     }

@@ -23,6 +23,7 @@ export interface IReportEventsObj {
 }
 
 export interface IReportItemDetails {
+  id?: number,
   title: string;
   date: Date;
   category_info: {
@@ -52,4 +53,17 @@ export interface IReportUpdateParameters {
     final_things?: string;
   };
   events?: IReportEventsObj | null;
+}
+
+export interface IReportRowObject extends IReportEventsObj {
+  id: number;
+  title: string;
+  date: Date;
+  category_id: number;
+  category_name: string;
+  author_id: number;
+  author_name: string;
+  author_nationality: string;
+  full_text: string;
+  final_things: string;
 }

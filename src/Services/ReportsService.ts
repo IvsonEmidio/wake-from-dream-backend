@@ -11,9 +11,11 @@ import {
 import {
   parseEventsObjToQueryValues,
   parseObjToUpdateQueryItems,
+  parseRowObjToResponseObj,
 } from "../Helpers/objectManipulation";
 import {
   IReportEventsObj,
+  IReportItemDetails,
   IReportPostParameters,
   IReportUpdateParameters,
 } from "../Interfaces/IReports";
@@ -296,6 +298,60 @@ export default class ReportsService {
       };
     }
   }
+
+  /**
+   * Get all available reports
+   * @param page - Pagination of items per page.
+   * @param itemsPerPage - Amount of items per page
+   */
+  public async getAllReports(page: number, itemsPerPage: number):
+    Promise<{
+      success: boolean;
+      data: Array<IReportItemDetails> | [];
+      errors: unknown
+    }> {
+    //TODO - Recreate.
+    let eventsColumns = parseArrayToQueryStringLine(allowedEvents);
+    let query = `
+    SELECT reports.id, title, date, category_id, author_id,
+    reports_categories.name AS category_name,
+    reports_authors.name AS author_name,
+    reports_authors.nationality AS author_nationality,
+    full_text, final_things, ${eventsColumns}
+    FROM reports
+    JOIN reports_categories
+    ON reports_categories.id = reports.category_id
+    JOIN reports_authors
+    ON reports_authors.id = reports.author_id
+    JOIN reports_texts
+    ON reports_texts.report_id = reports.id
+    JOIN reports_events
+    ON reports_events.report_id = reports.id
+    ORDER BY reports.id
+    LIMIT $2
+    OFFSET ($1 - 1) * $2;`;
+    let values = [page, itemsPerPage];
+
+    return pool.query(query, values).then((result) => {
+      let items = result.rows.map(row => {
+        return parseRowObjToResponseObj(row);
+      });
+
+      return {
+        success: true,
+        data: items,
+        errors: null
+      }
+    })
+      .catch((err) => {
+        return {
+          success: false,
+          data: [],
+          errors: err
+        }
+      })
+  }
+
 
   /**
    * Get an instance of IReportsStrategy Interface -

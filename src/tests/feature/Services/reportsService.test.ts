@@ -1,6 +1,7 @@
 import { allowedEvents } from "../../../Controllers/ReportsController";
 import { parseEventsArrayToObject } from "../../../Helpers/arrayManipulation";
 import {
+  IReportItemDetails,
   IReportPostParameters,
   IReportUpdateParameters,
 } from "../../../Interfaces/IReports";
@@ -170,3 +171,33 @@ describe("Test whether a user can update the report correctly", () => {
     expect(response).toStrictEqual(expectedResponse);
   });
 });
+
+describe("Test whether a user can get all reports correctly", () => {
+  test("Should return all reports", async () => {
+    //Set
+    let page = 1;
+    let itemsPerPage = 50;
+    let result = {
+      statusCode: 200,
+      message: 'Successfully found report items',
+    }
+
+    //Act
+    let dbOperation = await service.getAllReports(page, itemsPerPage);
+    let { success, data } = dbOperation;
+    if (success && data.length === 0) {
+      result.statusCode = 404;
+      result.message = 'No results found, check your query and try again.'
+    } else if (!success) {
+      result.statusCode = 500;
+      result.message = 'An error has occurred, please try again later.'
+    }
+
+    //Assert
+    let expectResult = {
+      statusCode: 200,
+      message: 'Successfully found report items',
+    }
+    expect(result).toStrictEqual(expectResult);
+  })
+})
