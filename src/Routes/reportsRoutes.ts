@@ -17,7 +17,7 @@ export default function reportsRoutes(app: Application) {
     app.post(
         '/report',
         controller.validateBody('create'),
-        controller.createReport.bind(controller)
+        controller.create.bind(controller)
     );
 
     app.get(

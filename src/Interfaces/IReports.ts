@@ -1,4 +1,4 @@
-export interface IReportPostParameters {
+export interface IReportPostParams {
   title: string;
   author_id: number;
   category_id: number;
