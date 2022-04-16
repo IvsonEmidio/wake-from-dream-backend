@@ -1,67 +1,65 @@
 import {
-  IReportPostParameters,
-  IReportUpdateParameters,
-} from "../Interfaces/IReports";
-import {
   body,
   check,
   param,
-  query,
   ValidationChain,
   validationResult,
 } from "express-validator";
 import { Request, Response } from "express";
 import ReportsService from "../Services/ReportsService";
 import { parseEventsArrayToObject } from "../Helpers/arrayManipulation";
+import {
+  IReportPostParams,
+  IReportUpdateParameters,
+} from "../Interfaces/IReports";
 
 export default class ReportsController {
-  reportsService: ReportsService;
+  service: ReportsService;
 
   constructor() {
-    this.reportsService = new ReportsService();
+    this.service = new ReportsService();
   }
 
   /**
-   * Adds a new single report on database.
-   * @param {Request} req
-   * @param {Response} req
+   * Creates a new report on database
    */
-  public async createReport(req: Request, res: Response) {
+  public async create(req: Request, res: Response) {
     try {
       const errors = validationResult(req);
 
       if (!errors.isEmpty()) {
         return res.status(400).json({
           status: 0,
-          message: "Check the fields and try again",
+          message: 'Check request fields on try again',
           errors: errors.array(),
         });
+
+      }
+      let result = {
+        statusCode: 200,
+        message: 'Successfully created new report',
+        data: { id: 0 }
+      };
+      let data: IReportPostParams = req.body;
+      let dbOperation = await this.service.createOnDatabase(data);
+      let { success, generatedID } = dbOperation;
+      if (!success || !generatedID) {
+        result.statusCode = 500;
+        result.message = 'New report successfully created on database';
+      } else if (generatedID) {
+        result.data.id = generatedID;
       }
 
-      let data: IReportPostParameters = req.body;
-      let dbOperation = await this.reportsService.createSingleReport(data);
-      if (dbOperation.success) {
-        return res.status(200).json({
-          status: 1,
-          message: "New report successfully created on database",
-          data: {
-            id: dbOperation.newId,
-          },
-        });
-      } else {
-        return res.status(500).json({
-          status: 0,
-          errors: {
-            message:
-              "An error has occurred when creating a new report on database",
-          },
-        });
-      }
+      return res.status(result.statusCode).json({
+        status: success ? 1 : 0,
+        message: result.message,
+        data: result.data
+      })
     } catch (err) {
       res.status(500).json({
         status: 0,
         errors: {
-          message: "An unknown error has occurred when validating the fields.",
+          message: "An unknown error has occurred, please, try again later",
         },
       });
     }
@@ -85,7 +83,7 @@ export default class ReportsController {
       }
 
       let reportId = parseInt(req.params.id);
-      let dbOperation = await this.reportsService.getSingleReport(reportId);
+      let dbOperation = await this.service.getSingleReport(reportId);
       if (dbOperation.success) {
         res.status(200).json({
           status: 1,
@@ -117,6 +115,7 @@ export default class ReportsController {
     }
   }
 
+
   /**
    * Delete a single report by ID.
    * @param {Request} req
@@ -136,7 +135,7 @@ export default class ReportsController {
       let reportId = parseInt(req.params.id);
       let code: number = 200;
       let message: string = "Successfully deleted the report.";
-      let dbOperation = await this.reportsService.deleteSingleReport(reportId);
+      let dbOperation = await this.service.deleteSingleReport(reportId);
       let { success, found } = dbOperation;
 
       if (success) {
@@ -194,7 +193,7 @@ export default class ReportsController {
           : null,
       };
 
-      let dbOperation = await this.reportsService.updateSingleReport(data);
+      let dbOperation = await this.service.updateSingleReport(data);
       let { errors: operationErrors } = dbOperation;
       let msg = "Successfully updated report details";
       let statusCode = 200;
@@ -242,14 +241,14 @@ export default class ReportsController {
         });
       }
 
-      let page = parseInt(req.params.pageNum);
+      let page = parseInt(req.params.page);
       let itemsPerPage = 50;
       let result = {
         statusCode: 200,
         message: 'Successfully found report items',
       };
 
-      let dbOperation = await this.reportsService.getAllReports(page, itemsPerPage);
+      let dbOperation = await this.service.getAllReports(page, itemsPerPage);
       let { success, data } = dbOperation;
       if (success && data.length === 0) {
         result.statusCode = 404;
@@ -283,7 +282,7 @@ export default class ReportsController {
       case "updateReport":
         return [param("id", "the report id need to be an integer.").isInt()];
       case "getAllReports":
-        return [param("pageNum", "PageNum needs to be an valid integer.").isInt()];
+        return [param("page", "PageNum needs to be an valid integer.").isInt()];
       default:
         return [];
     }
@@ -291,7 +290,7 @@ export default class ReportsController {
 
   public validateBody(method: string): Array<ValidationChain> {
     switch (method) {
-      case "createReport":
+      case "create":
         return [
           body("title", `Invalid field 'title'.`)
             .isString()
