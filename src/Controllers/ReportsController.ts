@@ -36,7 +36,7 @@ export default class ReportsController {
 
       }
       let result = {
-        statusCode: 200,
+        httpCode: 200,
         message: 'Successfully created new report',
         data: { id: 0 }
       };
@@ -44,13 +44,13 @@ export default class ReportsController {
       let dbOperation = await this.service.createOnDatabase(data);
       let { success, generatedID } = dbOperation;
       if (!success || !generatedID) {
-        result.statusCode = 500;
-        result.message = 'New report successfully created on database';
+        result.httpCode = 500;
+        result.message = 'An error has occurred when inserting new report on database, please, try again later';
       } else if (generatedID) {
         result.data.id = generatedID;
       }
 
-      return res.status(result.statusCode).json({
+      return res.status(result.httpCode).json({
         status: success ? 1 : 0,
         message: result.message,
         data: result.data
@@ -292,22 +292,22 @@ export default class ReportsController {
     switch (method) {
       case "create":
         return [
-          body("title", `Invalid field 'title'.`)
+          body('title', 'title must have min 10 characters and maximum 255.')
             .isString()
             .isLength({ min: 10, max: 255 }),
-          body("author_id", `Invalid field 'author_id'.`).optional().isInt(),
-          body("category_id", `Invalid field 'category_id'.`).isInt(),
-          body("date", `invalid field 'date'`).isDate(),
-          body("full_text", `invalid field 'full_text'`)
+          body('author_id', 'field author_id needs to be an integer').optional().isInt(),
+          body('category_id', 'field category_id needs to be an integer').isInt(),
+          body('date', 'field date must be in date format. EG: 2000-03-27').isDate(),
+          body('full_text', 'field full_text must have minimum 50 characters')
             .isString()
             .isLength({ min: 50 }),
-          body("final_things", `invalid field 'final_things'`)
+          body('final_things', 'field final_things needs to be an string')
             .optional()
             .isString(),
-          body("events", `invalid field 'events'`)
+          body('events', 'field events needs to be an array with minimum 1 string')
             .optional()
             .isArray({ min: 1 }),
-          check("events.*", `Invalid event, check list of allowed events.`)
+          check('events.*', 'Invalid event, check list of allowed events.')
             .isString()
             .isIn(allowedEvents),
         ];

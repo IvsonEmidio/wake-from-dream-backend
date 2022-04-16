@@ -16,80 +16,72 @@ import {
 import {
   IReportEventsObj,
   IReportItemDetails,
-  IReportPostParameters,
+  IReportPostParams,
   IReportUpdateParameters,
 } from "../Interfaces/IReports";
 
 export default class ReportsService {
-  /**
-   * Creates a new report on database.
-   * @param {IReportPostParameters} data
-   */
-  public async createSingleReport(data: IReportPostParameters): Promise<{
+  public async createOnDatabase(data: IReportPostParams): Promise<{
     success: boolean;
-    newId?: number;
-    errors?: unknown;
+    generatedID: number | null;
+    errors: unknown;
   }> {
     try {
       await pool.query("BEGIN");
 
-      //Insert new row on 'reports' table.
-      let reportQuery = `INSERT INTO reports
-             (title, author_id, category_id, date)
-              VALUES($1, $2, $3, $4) RETURNING id`;
-      let reportQueryValues = [
+      //Insert new row on 'reports' table as 't1'.
+      let t1Query = `
+      INSERT INTO reports
+      (title, author_id, category_id, date)
+      VALUES($1, $2, $3, $4) RETURNING id`;
+      let t1QueryValues = [
         data.title,
         data.author_id,
         data.category_id,
         data.date,
       ];
-      let insertReport = await pool.query(reportQuery, reportQueryValues);
+      let insertReport = await pool.query(t1Query, t1QueryValues);
       const generatedReportId = insertReport.rows[0].id;
 
-      //Insert new relational row on 'reports_texts' table.
-      let reportTextQuery = `INSERT INTO reports_texts
-             (report_id, full_text, final_things)
-              VALUES($1, $2, $3)`;
-      let reportTextQueryValues = [
+      //Insert new row on 'reports_texts' table as 't2'.
+      let t2Query = `
+      INSERT INTO reports_texts
+      (report_id, full_text, final_things)
+      VALUES($1, $2, $3)`;
+      let t2QueryValues = [
         generatedReportId,
         data.full_text,
         data.final_things,
       ];
-      await pool.query(reportTextQuery, reportTextQueryValues);
+      await pool.query(t2Query, t2QueryValues);
 
-      //Insert new relational row on 'reports_events' table
-      let events: IReportEventsObj = parseEventsArrayToObject(data.events);
-      let eventQuery = `INSERT INTO reports_events
-             (report_id, lights, out_of_body, seen_spirits, tunnel_vision, watched_life_movie,
-                 feel_peace_and_love, dont_want_come_back, no_more_death_fear, seen_death_parents,
-                  other_dimension, need_finish_mission)
-                   VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`;
-      let eventQueryValues = [
+      //Insert new row on 'reports_events' table as 't3'
+      let eventsObj = parseEventsArrayToObject(data.events);
+      let eventsColumns = parseArrayToQueryStringLine(allowedEvents);
+      let eventColumnsValues = parseEventsObjToQueryValues(eventsObj);
+
+      let t3Query = `
+      INSERT INTO reports_events
+      (report_id, ${eventsColumns})
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`;
+      let t3QueryValues = [
         generatedReportId,
-        events.lights,
-        events.out_of_body,
-        events.seen_spirits,
-        events.tunnel_vision,
-        events.watched_life_movie,
-        events.feel_peace_and_love,
-        events.dont_want_come_back,
-        events.no_more_death_fear,
-        events.seen_death_parents,
-        events.other_dimension,
-        events.need_finish_mission,
+        ...eventColumnsValues
       ];
-      await pool.query(eventQuery, eventQueryValues);
+      await pool.query(t3Query, t3QueryValues);
 
       await pool.query("COMMIT");
 
       return {
         success: true,
-        newId: generatedReportId,
+        generatedID: generatedReportId,
+        errors: null
       };
     } catch (err) {
       await pool.query("ROLLBACK");
       return {
         success: false,
+        generatedID: null,
         errors: err,
       };
     }

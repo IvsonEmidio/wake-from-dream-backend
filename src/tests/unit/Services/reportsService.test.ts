@@ -1,14 +1,14 @@
 import { allowedEvents } from "../../../Controllers/ReportsController";
 import pool from "../../../Database/pool";
-import { parseArrayToQueryStringLine } from "../../../Helpers/arrayManipulation";
+import { parseArrayToQueryStringLine, parseEventsArrayToObject } from "../../../Helpers/arrayManipulation";
 import {
   parseEventsObjToQueryValues,
   parseObjToUpdateQueryItems,
   parseRowObjToResponseObj,
 } from "../../../Helpers/objectManipulation";
 
-describe("check whether we can get a report by id", () => {
-  test("should get an report by ID from database", async () => {
+describe('Reports service class methods', () => {
+  test('should get an report by ID from database', async () => {
     //Set
     let reportId = 107;
     let events = "";
@@ -69,6 +69,86 @@ describe("check whether we can get a report by id", () => {
 
     expect(response.rows[0]).toStrictEqual(expectedResponse);
   });
+
+  test('Should create a new item on database', async () => {
+    let data = {
+      title: "Nosso guia sempre está nos ajudando",
+      author_id: 1,
+      category_id: 2,
+      date: new Date('2000-07-21'),
+      full_text: "Lorem ipsum is a typography from france in 1990s that has made from a stratch it's a good thing for creating initial texts on databases that you don't know what to written",
+      final_things: "",
+      events: [
+        'seen_spirits',
+        'out_of_body'
+      ]
+    }
+    await pool.query("BEGIN");
+
+    //Insert new row on 'reports' table as 't1'.
+    let t1Query = `
+      INSERT INTO reports
+      (title, author_id, category_id, date)
+      VALUES($1, $2, $3, $4) RETURNING id`;
+    let t1QueryValues = [
+      data.title,
+      data.author_id,
+      data.category_id,
+      data.date,
+    ];
+    let insertReport = await pool.query(t1Query, t1QueryValues);
+    const generatedReportId = insertReport.rows[0].id;
+
+    //Insert new row on 'reports_texts' table as 't2'.
+    let t2Query = `
+      INSERT INTO reports_texts
+      (report_id, full_text, final_things)
+      VALUES($1, $2, $3)`;
+    let t2QueryValues = [
+      generatedReportId,
+      data.full_text,
+      data.final_things,
+    ];
+    await pool.query(t2Query, t2QueryValues);
+
+    //Insert new row on 'reports_events' table as 't3'
+    let eventsObj = parseEventsArrayToObject(data.events);
+    let eventsColumns = parseArrayToQueryStringLine(allowedEvents);
+    let eventColumnsValues = parseEventsObjToQueryValues(eventsObj);
+
+    let t3Query = `
+      INSERT INTO reports_events
+      (report_id, ${eventsColumns})
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`;
+    let t3QueryValues = [
+      generatedReportId,
+      ...eventColumnsValues
+    ];
+    await pool.query(t3Query, t3QueryValues);
+
+    let response = await pool.query("COMMIT")
+      .then(() => {
+        return {
+          success: true,
+          errors: false,
+        };
+      })
+      .catch((err) => {
+        return {
+          success: false,
+          errors: err,
+        }
+      })
+
+    let expectedResponse = {
+      success: true,
+      errors: false,
+    }
+
+    expect(response).toStrictEqual(expectedResponse);
+
+  });
+
 });
 
 describe("Check whether we can delete a report by id", () => {
@@ -227,7 +307,7 @@ describe("Check whether we can update an report by ID", () => {
       });
 
     //Update 'reports_events' table as t3
-    let t3Items: string = parseObjToUpdateQueryItems(newData.events);
+    let t3Items = parseObjToUpdateQueryItems(newData.events);
     let t3ItemsValues: Array<boolean> = parseEventsObjToQueryValues<boolean>(
       newData.events
     );

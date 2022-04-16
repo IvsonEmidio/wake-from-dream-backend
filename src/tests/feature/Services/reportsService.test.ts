@@ -2,7 +2,7 @@ import { allowedEvents } from "../../../Controllers/ReportsController";
 import { parseEventsArrayToObject } from "../../../Helpers/arrayManipulation";
 import {
   IReportItemDetails,
-  IReportPostParameters,
+  IReportPostParams,
   IReportUpdateParameters,
 } from "../../../Interfaces/IReports";
 import ReportsService from "../../../Services/ReportsService";
@@ -12,7 +12,7 @@ const service = new ReportsService();
 describe("Test whether a new record has created on database", () => {
   test("should create a new report on database", async () => {
     //Set
-    let testingData: IReportPostParameters = {
+    let testingData: IReportPostParams = {
       title: "Vi a luz e obtive amor",
       author_id: 1,
       category_id: 2,
@@ -24,7 +24,7 @@ describe("Test whether a new record has created on database", () => {
     };
 
     //Act
-    let response = await service.createSingleReport(testingData);
+    let response = await service.createOnDatabase(testingData);
 
     //Assert
     expect(response.success).toBeTruthy();
@@ -34,7 +34,7 @@ describe("Test whether a new record has created on database", () => {
 describe("Test whether a new record has rejected on database", () => {
   test("should database reject the report", async () => {
     //Set
-    let testingData: IReportPostParameters = {
+    let testingData: IReportPostParams = {
       title: "Vi a luz e obtive amor",
       author_id: 999999999,
       category_id: 99999999,
@@ -46,7 +46,7 @@ describe("Test whether a new record has rejected on database", () => {
     };
 
     //Act
-    let response = await service.createSingleReport(testingData);
+    let response = await service.createOnDatabase(testingData);
 
     //Assert
     expect(response.success).toBeFalsy();
