@@ -221,7 +221,7 @@ export default class ReportsController {
   /**
    * Get all reports
    */
-  public async getAllReports(req: Request, res: Response) {
+  public async all(req: Request, res: Response) {
     try {
       let errors = validationResult(req);
       if (!errors.isEmpty()) {
@@ -239,7 +239,10 @@ export default class ReportsController {
         message: "Successfully found report items",
       };
 
-      let dbOperation = await this.service.getAllReports(page, itemsPerPage);
+      let dbOperation = await this.service.getAllFromDatabase(
+        page,
+        itemsPerPage
+      );
       let { success, data } = dbOperation;
       if (success && data.length === 0) {
         result.statusCode = 404;

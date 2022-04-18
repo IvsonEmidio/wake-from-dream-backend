@@ -13,7 +13,7 @@ import {
 describe("Reports service class methods", () => {
   test("should get an report by ID from database", async () => {
     //Set
-    let reportId = 7;
+    let reportId = 14;
     let events = parseArrayToQueryStringLine(allowedEvents);
 
     let query = `
@@ -131,7 +131,7 @@ describe("Reports service class methods", () => {
   test("Should update a report by ID", async () => {
     //Set
     let newData = {
-      id: 7,
+      id: 14,
       title: "The light is the everything forever.",
       date: "2008-03-27",
       author_id: 1,
@@ -290,74 +290,8 @@ describe("Reports service class methods", () => {
 
     expect(response).toStrictEqual(expectResponse);
   });
-});
 
-describe("Check whether we can delete a report by id", () => {
-  test("Should delete a report by ID", async () => {
-    //Set
-    let reportID = 3;
-    let query = `DELETE FROM reports WHERE id = $1`;
-    let queryValues = [reportID];
-
-    //Act
-    let response = await pool
-      .query(query, queryValues)
-      .then(() => {
-        return {
-          success: true,
-        };
-      })
-      .catch(() => {
-        return {
-          success: false,
-        };
-      });
-
-    //Assert
-    let expectResponse = {
-      success: true,
-    };
-
-    expect(response).toStrictEqual(expectResponse);
-  });
-});
-
-describe("Check whether we can return an error on invalid report ID", () => {
-  test("Should return an error when deleting a report ID", async () => {
-    //Set
-    let reportID = "random";
-    let query = `DELETE FROM reports WHERE id = $1`;
-    let queryValues = [reportID];
-
-    //Act
-    let response = await pool
-      .query(query, queryValues)
-      .then(() => {
-        return {
-          success: true,
-          random: true,
-        };
-      })
-      .catch(() => {
-        return {
-          success: false,
-          random: false,
-        };
-      });
-
-    //Assert
-    let expectResponse = {
-      success: false,
-      random: false,
-    };
-
-    expect(response).toStrictEqual(expectResponse);
-  });
-});
-
-describe("Check whether we can get all reports details with pagination", () => {
   test("Should return all reports details", async () => {
-    //TODO - Test this.
     let data = {
       page: 1,
       itemsPerPage: 50,

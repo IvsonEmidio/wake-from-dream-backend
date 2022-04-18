@@ -253,7 +253,7 @@ export default class ReportsService {
     }
   }
 
-  public async getAllReports(
+  public async getAllFromDatabase(
     page: number,
     itemsPerPage: number
   ): Promise<{
@@ -261,7 +261,6 @@ export default class ReportsService {
     data: Array<IReportItemDetails> | [];
     errors: unknown;
   }> {
-    //TODO - Recreate.
     let eventsColumns = parseArrayToQueryStringLine(allowedEvents);
     let query = `
     SELECT reports.id, title, date, category_id, author_id,

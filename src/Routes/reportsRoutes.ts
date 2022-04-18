@@ -11,7 +11,7 @@ export default function reportsRoutes(app: Application) {
   app.get(
     "/reports/:page",
     controller.validateParams("all"),
-    controller.getAllReports.bind(controller)
+    controller.all.bind(controller)
   );
 
   app.post(
