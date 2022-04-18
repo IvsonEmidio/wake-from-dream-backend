@@ -160,11 +160,9 @@ export default class ReportsController {
   }
 
   /**
-   * Update an single report basic details.
-   * @param {Request} req
-   * @param {Response} res
+   * Update an single report details.
    */
-  public async updateReport(req: Request, res: Response) {
+  public async update(req: Request, res: Response) {
     try {
       let errors = validationResult(req);
       if (!errors.isEmpty()) {
@@ -190,7 +188,7 @@ export default class ReportsController {
           : null,
       };
 
-      let dbOperation = await this.service.updateSingleReport(data);
+      let dbOperation = await this.service.updateOnDatabase(data);
       let { errors: operationErrors } = dbOperation;
       let msg = "Successfully updated report details";
       let statusCode = 200;
@@ -316,27 +314,31 @@ export default class ReportsController {
             .isString()
             .isIn(allowedEvents),
         ];
-      case "updateReport":
+      case "update":
         return [
           body(
             "title",
-            'field "title" need to be a string with minimum 7 characters'
+            "field 'title' need to be a string with minimum 7 characters"
           )
             .optional()
             .isString()
             .isLength({ min: 7 }),
+
           body(
             "date",
             'field "date" needs to be in date format. EG: "2000-03-27"'
           )
             .optional()
             .isDate(),
+
           body("author_id", 'field "author_id" needs to be a integer')
             .optional()
             .isInt(),
+
           body("category_id", 'field "category_id" needs to a integer')
             .optional()
             .isInt(),
+
           body(
             "full_text",
             'field "full_text" needs to be a string with minimum 50 characters'
@@ -344,6 +346,7 @@ export default class ReportsController {
             .optional()
             .isString()
             .isLength({ min: 50 }),
+
           body(
             "final_things",
             'field "final_things" needs to be a string with minimum 7 characters'
@@ -351,9 +354,11 @@ export default class ReportsController {
             .optional()
             .isString()
             .isLength({ min: 7 }),
+
           body("events", 'the field "events" needs to be a array of strings')
             .optional()
             .isArray({ min: 1 }),
+
           body(
             "events.*",
             "events array must have valid events, check the list of valid events and try again"

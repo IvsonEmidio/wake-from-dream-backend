@@ -36,6 +36,6 @@ export default function reportsRoutes(app: Application) {
     "/report/:id",
     controller.validateBody("update"),
     controller.validateParams("update"),
-    controller.updateReport.bind(controller)
+    controller.update.bind(controller)
   );
 }

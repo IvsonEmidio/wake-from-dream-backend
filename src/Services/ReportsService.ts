@@ -184,9 +184,8 @@ export default class ReportsService {
   /**
    * Update a single report details
    * @param {IReportEventsObj} data
-   * @returns
    */
-  public async updateSingleReport(data: IReportUpdateParameters): Promise<{
+  public async updateOnDatabase(data: IReportUpdateParameters): Promise<{
     success: boolean;
     errors: unknown;
   }> {
@@ -232,10 +231,10 @@ export default class ReportsService {
 
       //Update 'reports_events' table as t3
       if (data.events) {
-        let t3Items: string = parseObjToUpdateQueryItems(data.events);
+        let t3Items = parseObjToUpdateQueryItems(data.events);
         let t3ItemsValues: Array<boolean> =
           parseEventsObjToQueryValues<boolean>(data.events);
-        let lastParamNumber: number = t3ItemsValues.length + 1;
+        let lastParamNumber = t3ItemsValues.length + 1;
 
         let t3Query: string = `
         UPDATE reports_events SET
