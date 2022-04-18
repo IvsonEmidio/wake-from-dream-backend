@@ -1,14 +1,17 @@
 import { allowedEvents } from "../../../Controllers/ReportsController";
 import pool from "../../../Database/pool";
-import { parseArrayToQueryStringLine, parseEventsArrayToObject } from "../../../Helpers/arrayManipulation";
+import {
+  parseArrayToQueryStringLine,
+  parseEventsArrayToObject,
+} from "../../../Helpers/arrayManipulation";
 import {
   parseEventsObjToQueryValues,
   parseObjToUpdateQueryItems,
   parseRowObjToResponseObj,
 } from "../../../Helpers/objectManipulation";
 
-describe('Reports service class methods', () => {
-  test('should get an report by ID from database', async () => {
+describe("Reports service class methods", () => {
+  test("should get an report by ID from database", async () => {
     //Set
     let reportId = 7;
     let events = parseArrayToQueryStringLine(allowedEvents);
@@ -34,40 +37,38 @@ describe('Reports service class methods', () => {
 
     //Act
     let response = await pool.query(query, values).then((result) => {
-      let success = false, errors = null;
+      let success = false,
+        errors = null;
       if (result.rowCount > 0) {
         success = true;
       }
 
       return {
         success,
-        errors
-      }
+        errors,
+      };
     });
 
     //Assert
     let expectedResponse = {
       success: true,
-      errors: null
+      errors: null,
     };
-
 
     expect(response).toStrictEqual(expectedResponse);
   });
 
-  test('Should create a new item on database', async () => {
+  test("Should create a new item on database", async () => {
     let data = {
       title: "Nosso guia sempre está nos ajudando",
       author_id: 1,
       category_id: 2,
-      date: new Date('2000-07-21'),
-      full_text: "Lorem ipsum is a typography from france in 1990s that has made from a stratch it's a good thing for creating initial texts on databases that you don't know what to written",
+      date: new Date("2000-07-21"),
+      full_text:
+        "Lorem ipsum is a typography from france in 1990s that has made from a stratch it's a good thing for creating initial texts on databases that you don't know what to written",
       final_things: "",
-      events: [
-        'seen_spirits',
-        'out_of_body'
-      ]
-    }
+      events: ["seen_spirits", "out_of_body"],
+    };
     await pool.query("BEGIN");
 
     //Insert new row on 'reports' table as 't1'.
@@ -89,11 +90,7 @@ describe('Reports service class methods', () => {
       INSERT INTO reports_texts
       (report_id, full_text, final_things)
       VALUES($1, $2, $3)`;
-    let t2QueryValues = [
-      generatedReportId,
-      data.full_text,
-      data.final_things,
-    ];
+    let t2QueryValues = [generatedReportId, data.full_text, data.final_things];
     await pool.query(t2Query, t2QueryValues);
 
     //Insert new row on 'reports_events' table as 't3'
@@ -105,13 +102,11 @@ describe('Reports service class methods', () => {
       INSERT INTO reports_events
       (report_id, ${eventsColumns})
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`;
-    let t3QueryValues = [
-      generatedReportId,
-      ...eventColumnsValues
-    ];
+    let t3QueryValues = [generatedReportId, ...eventColumnsValues];
     await pool.query(t3Query, t3QueryValues);
 
-    let response = await pool.query("COMMIT")
+    let response = await pool
+      .query("COMMIT")
       .then(() => {
         return {
           success: true,
@@ -122,18 +117,16 @@ describe('Reports service class methods', () => {
         return {
           success: false,
           errors: err,
-        }
-      })
+        };
+      });
 
     let expectedResponse = {
       success: true,
       errors: false,
-    }
+    };
 
     expect(response).toStrictEqual(expectedResponse);
-
   });
-
 });
 
 describe("Check whether we can delete a report by id", () => {
@@ -341,7 +334,7 @@ describe("Check whether we can get all reports details with pagination", () => {
     //TODO - Test this.
     let data = {
       page: 1,
-      itemsPerPage: 50
+      itemsPerPage: 50,
     };
 
     let eventsColumns = parseArrayToQueryStringLine(allowedEvents);
@@ -365,22 +358,21 @@ describe("Check whether we can get all reports details with pagination", () => {
     OFFSET ($1 - 1) * $2;`;
     let values = [data.page, data.itemsPerPage];
     let response = await pool.query(query, values).then((result) => {
-      let array = result.rows.map(row => {
+      let array = result.rows.map((row) => {
         return parseRowObjToResponseObj(row);
       });
 
       if (array.length === 50) {
         return {
-          success: true
-        }
+          success: true,
+        };
       }
     });
 
     let expectedResponse = {
-      success: true
+      success: true,
     };
 
     expect(response).toStrictEqual(expectedResponse);
-
-  })
-})
+  });
+});

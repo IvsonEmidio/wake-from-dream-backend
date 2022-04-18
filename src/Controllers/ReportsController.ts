@@ -30,22 +30,22 @@ export default class ReportsController {
       if (!errors.isEmpty()) {
         return res.status(400).json({
           status: 0,
-          message: 'Check request fields on try again',
+          message: "Check request fields on try again",
           errors: errors.array(),
         });
-
       }
       let result = {
         httpCode: 200,
-        message: 'Successfully created new report',
-        data: { id: 0 }
+        message: "Successfully created new report",
+        data: { id: 0 },
       };
       let data: IReportPostParams = req.body;
       let dbOperation = await this.service.createOnDatabase(data);
       let { success, generatedID } = dbOperation;
       if (!success || !generatedID) {
         result.httpCode = 500;
-        result.message = 'An error has occurred when inserting new report on database, please, try again later';
+        result.message =
+          "An error has occurred when inserting new report on database, please, try again later";
       } else if (generatedID) {
         result.data.id = generatedID;
       }
@@ -53,8 +53,8 @@ export default class ReportsController {
       return res.status(result.httpCode).json({
         status: success ? 1 : 0,
         message: result.message,
-        data: result.data
-      })
+        data: result.data,
+      });
     } catch (err) {
       res.status(500).json({
         status: 0,
@@ -112,7 +112,6 @@ export default class ReportsController {
       });
     }
   }
-
 
   /**
    * Delete a single report by ID.
@@ -199,12 +198,14 @@ export default class ReportsController {
       if (operationErrors) {
         if (operationErrors instanceof Error) {
           let { message } = operationErrors;
-          if (message === 'id not found') {
-            msg = 'The report ID has not found, check the fields and try again.';
+          if (message === "id not found") {
+            msg =
+              "The report ID has not found, check the fields and try again.";
             statusCode = 404;
           }
         } else {
-          msg = 'An unknown error has occurred when updating the report on database, please, try again later';
+          msg =
+            "An unknown error has occurred when updating the report on database, please, try again later";
           statusCode = 500;
         }
       }
@@ -213,11 +214,10 @@ export default class ReportsController {
         status: statusCode === 200 ? 1 : 0,
         message: msg,
       });
-
     } catch (err) {
       return res.status(500).json({
         status: 0,
-        message: 'An unknown error has occurred, please, try again later.',
+        message: "An unknown error has occurred, please, try again later.",
       });
     }
   }
@@ -225,10 +225,7 @@ export default class ReportsController {
   /**
    * Get all reports
    */
-  public async getAllReports(
-    req: Request,
-    res: Response
-  ) {
+  public async getAllReports(req: Request, res: Response) {
     try {
       let errors = validationResult(req);
       if (!errors.isEmpty()) {
@@ -243,43 +240,42 @@ export default class ReportsController {
       let itemsPerPage = 50;
       let result = {
         statusCode: 200,
-        message: 'Successfully found report items',
+        message: "Successfully found report items",
       };
 
       let dbOperation = await this.service.getAllReports(page, itemsPerPage);
       let { success, data } = dbOperation;
       if (success && data.length === 0) {
         result.statusCode = 404;
-        result.message = 'No results found, check your query and try again.';
+        result.message = "No results found, check your query and try again.";
       } else if (!success) {
         result.statusCode = 500;
-        result.message = 'An error has occurred, please try again later.';
+        result.message = "An error has occurred, please try again later.";
       }
 
       return res.status(result.statusCode).json({
         status: success ? 1 : 0,
         message: result.message,
         qntItems: data ? data.length : 0,
-        data
+        data,
       });
-
     } catch (err) {
       return res.status(500).json({
         status: 0,
-        message: 'An unknown error has occurred, please, try again later.',
+        message: "An unknown error has occurred, please, try again later.",
       });
     }
   }
 
   public validateParams(method: string): Array<ValidationChain> {
     switch (method) {
-      case 'get':
+      case "get":
         return [param("id", "the report id need to be an integer.").isInt()];
-      case 'delete':
+      case "delete":
         return [param("id", "the report id need to be an integer.").isInt()];
-      case 'update':
+      case "update":
         return [param("id", "the report id need to be an integer.").isInt()];
-      case 'all':
+      case "all":
         return [param("page", "PageNum needs to be an valid integer.").isInt()];
       default:
         return [];
@@ -290,44 +286,81 @@ export default class ReportsController {
     switch (method) {
       case "create":
         return [
-          body('title', 'title must have min 10 characters and maximum 255.')
+          body("title", "title must have min 10 characters and maximum 255.")
             .isString()
             .isLength({ min: 10, max: 255 }),
-          body('author_id', 'field author_id needs to be an integer').optional().isInt(),
-          body('category_id', 'field category_id needs to be an integer').isInt(),
-          body('date', 'field date must be in date format. EG: 2000-03-27').isDate(),
-          body('full_text', 'field full_text must have minimum 50 characters')
+          body("author_id", "field author_id needs to be an integer")
+            .optional()
+            .isInt(),
+          body(
+            "category_id",
+            "field category_id needs to be an integer"
+          ).isInt(),
+          body(
+            "date",
+            "field date must be in date format. EG: 2000-03-27"
+          ).isDate(),
+          body("full_text", "field full_text must have minimum 50 characters")
             .isString()
             .isLength({ min: 50 }),
-          body('final_things', 'field final_things needs to be an string')
+          body("final_things", "field final_things needs to be an string")
             .optional()
             .isString(),
-          body('events', 'field events needs to be an array with minimum 1 string')
+          body(
+            "events",
+            "field events needs to be an array with minimum 1 string"
+          )
             .optional()
             .isArray({ min: 1 }),
-          check('events.*', 'Invalid event, check list of allowed events.')
+          check("events.*", "Invalid event, check list of allowed events.")
             .isString()
             .isIn(allowedEvents),
         ];
       case "updateReport":
         return [
-          body('title', 'field "title" need to be a string with minimum 7 characters')
-            .optional().isString().isLength({ min: 7 }),
-          body('date', 'field "date" needs to be in date format. EG: "2000-03-27"')
-            .optional().isDate(),
-          body('author_id', 'field "author_id" needs to be a integer')
-            .optional().isInt(),
-          body('category_id', 'field "category_id" needs to a integer')
-            .optional().isInt(),
-          body('full_text', 'field "full_text" needs to be a string with minimum 50 characters')
-            .optional().isString().isLength({ min: 50 }),
-          body('final_things', 'field "final_things" needs to be a string with minimum 7 characters')
-            .optional().isString().isLength({ min: 7 }),
-          body('events', 'the field "events" needs to be a array of strings')
-            .optional().isArray({ min: 1 }),
-          body('events.*', 'events array must have valid events, check the list of valid events and try again')
-            .isString().isIn(allowedEvents)
-        ]
+          body(
+            "title",
+            'field "title" need to be a string with minimum 7 characters'
+          )
+            .optional()
+            .isString()
+            .isLength({ min: 7 }),
+          body(
+            "date",
+            'field "date" needs to be in date format. EG: "2000-03-27"'
+          )
+            .optional()
+            .isDate(),
+          body("author_id", 'field "author_id" needs to be a integer')
+            .optional()
+            .isInt(),
+          body("category_id", 'field "category_id" needs to a integer')
+            .optional()
+            .isInt(),
+          body(
+            "full_text",
+            'field "full_text" needs to be a string with minimum 50 characters'
+          )
+            .optional()
+            .isString()
+            .isLength({ min: 50 }),
+          body(
+            "final_things",
+            'field "final_things" needs to be a string with minimum 7 characters'
+          )
+            .optional()
+            .isString()
+            .isLength({ min: 7 }),
+          body("events", 'the field "events" needs to be a array of strings')
+            .optional()
+            .isArray({ min: 1 }),
+          body(
+            "events.*",
+            "events array must have valid events, check the list of valid events and try again"
+          )
+            .isString()
+            .isIn(allowedEvents),
+        ];
       default:
         return [];
     }

@@ -23,7 +23,7 @@ export interface IReportEventsObj {
 }
 
 export interface IReportItemDetails {
-  id?: number,
+  id?: number;
   title: string;
   date: Date;
   category_info: {

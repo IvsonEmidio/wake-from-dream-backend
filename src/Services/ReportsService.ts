@@ -64,10 +64,7 @@ export default class ReportsService {
       INSERT INTO reports_events
       (report_id, ${eventsColumns})
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`;
-      let t3QueryValues = [
-        generatedReportId,
-        ...eventColumnsValues
-      ];
+      let t3QueryValues = [generatedReportId, ...eventColumnsValues];
       await pool.query(t3Query, t3QueryValues);
 
       await pool.query("COMMIT");
@@ -75,7 +72,7 @@ export default class ReportsService {
       return {
         success: true,
         generatedID: generatedReportId,
-        errors: null
+        errors: null,
       };
     } catch (err) {
       await pool.query("ROLLBACK");
@@ -124,7 +121,7 @@ export default class ReportsService {
         return {
           success: true,
           data: rowParsed,
-          errors: null
+          errors: null,
         };
       } else {
         return {
@@ -271,12 +268,14 @@ export default class ReportsService {
    * @param page - Pagination of items per page.
    * @param itemsPerPage - Amount of items per page
    */
-  public async getAllReports(page: number, itemsPerPage: number):
-    Promise<{
-      success: boolean;
-      data: Array<IReportItemDetails> | [];
-      errors: unknown
-    }> {
+  public async getAllReports(
+    page: number,
+    itemsPerPage: number
+  ): Promise<{
+    success: boolean;
+    data: Array<IReportItemDetails> | [];
+    errors: unknown;
+  }> {
     //TODO - Recreate.
     let eventsColumns = parseArrayToQueryStringLine(allowedEvents);
     let query = `
@@ -299,26 +298,27 @@ export default class ReportsService {
     OFFSET ($1 - 1) * $2;`;
     let values = [page, itemsPerPage];
 
-    return pool.query(query, values).then((result) => {
-      let items = result.rows.map(row => {
-        return parseRowObjToResponseObj(row);
-      });
+    return pool
+      .query(query, values)
+      .then((result) => {
+        let items = result.rows.map((row) => {
+          return parseRowObjToResponseObj(row);
+        });
 
-      return {
-        success: true,
-        data: items,
-        errors: null
-      }
-    })
+        return {
+          success: true,
+          data: items,
+          errors: null,
+        };
+      })
       .catch((err) => {
         return {
           success: false,
           data: [],
-          errors: err
-        }
-      })
+          errors: err,
+        };
+      });
   }
-
 
   /**
    * Get an instance of IReportsStrategy Interface -

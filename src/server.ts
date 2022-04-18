@@ -12,9 +12,9 @@ publicRoutesMiddleware(app);
 reportsRoutes(app);
 
 try {
-    app.listen(port, (): void => {
-        console.log(`Connected successfully on port ${port}`);
-    });
+  app.listen(port, (): void => {
+    console.log(`Connected successfully on port ${port}`);
+  });
 } catch (error) {
-    console.error(`Error occured: ${error}`);
+  console.error(`Error occured: ${error}`);
 }
