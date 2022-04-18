@@ -91,10 +91,10 @@ export default class ReportsService {
    * Finds an report by ID.
    * @param {number} id
    */
-  public async getSingleReport(id: number): Promise<{
+  public async getFromDatabase(id: number): Promise<{
     success: boolean;
-    data?: object;
-    errors?: { message: string };
+    data: object | null;
+    errors: { message: string } | null;
   }> {
     try {
       let eventsLine = parseArrayToQueryStringLine(allowedEvents);
@@ -120,42 +120,16 @@ export default class ReportsService {
       let response = await pool.query(query, values);
       if (response.rowCount > 0) {
         let row = response.rows[0];
+        let rowParsed = parseRowObjToResponseObj(row);
         return {
           success: true,
-          data: {
-            title: row.title,
-            date: row.date,
-            category_info: {
-              category_id: row.category_id,
-              category_name: row.category_name,
-            },
-            author_info: {
-              author_id: row.author_id,
-              author_name: row.author_name,
-              author_nationality: row.author_nationality,
-            },
-            texts: {
-              full_text: row.full_text,
-              final_things: row.final_things,
-            },
-            events: {
-              lights: row.lights,
-              out_of_body: row.out_of_body,
-              seen_spirits: row.seen_spirits,
-              tunnel_vision: row.tunnel_vision,
-              watched_life_movie: row.watched_life_movie,
-              feel_peace_and_love: row.feel_peace_and_love,
-              dont_want_come_back: row.dont_want_come_back,
-              no_more_death_fear: row.no_more_death_fear,
-              seen_death_parents: row.seen_death_parents,
-              other_dimension: row.other_dimension,
-              need_finish_mission: row.need_finish_mission,
-            },
-          },
+          data: rowParsed,
+          errors: null
         };
       } else {
         return {
           success: false,
+          data: null,
           errors: {
             message:
               "The report has not found, please, check the id and try again.",
@@ -165,6 +139,7 @@ export default class ReportsService {
     } catch (err) {
       return {
         success: false,
+        data: null,
         errors: {
           message:
             "An unknown error has occurred on database, please, try again later.",

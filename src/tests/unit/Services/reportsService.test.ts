@@ -10,15 +10,8 @@ import {
 describe('Reports service class methods', () => {
   test('should get an report by ID from database', async () => {
     //Set
-    let reportId = 107;
-    let events = "";
-    allowedEvents.forEach((item, i) => {
-      if (i === 0) {
-        events = events + item;
-      } else {
-        events = events + ", " + item;
-      }
-    });
+    let reportId = 7;
+    let events = parseArrayToQueryStringLine(allowedEvents);
 
     let query = `
             SELECT title, date, category_id, author_id,
@@ -40,34 +33,26 @@ describe('Reports service class methods', () => {
     let values = [reportId];
 
     //Act
-    let response = await pool.query(query, values);
+    let response = await pool.query(query, values).then((result) => {
+      let success = false, errors = null;
+      if (result.rowCount > 0) {
+        success = true;
+      }
+
+      return {
+        success,
+        errors
+      }
+    });
 
     //Assert
     let expectedResponse = {
-      author_id: 1,
-      author_name: "Anonymous",
-      author_nationality: null,
-      category_id: 2,
-      category_name: "American",
-      date: new Date("2000-03-27T03:00:00.000Z"),
-      dont_want_come_back: false,
-      feel_peace_and_love: false,
-      final_things: "Busquem o amor acima de tudo",
-      full_text:
-        "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum",
-      lights: false,
-      need_finish_mission: true,
-      no_more_death_fear: false,
-      other_dimension: false,
-      out_of_body: false,
-      seen_death_parents: false,
-      seen_spirits: false,
-      title: "Vi a luz e obtive amor",
-      tunnel_vision: true,
-      watched_life_movie: false,
+      success: true,
+      errors: null
     };
 
-    expect(response.rows[0]).toStrictEqual(expectedResponse);
+
+    expect(response).toStrictEqual(expectedResponse);
   });
 
   test('Should create a new item on database', async () => {
@@ -154,7 +139,7 @@ describe('Reports service class methods', () => {
 describe("Check whether we can delete a report by id", () => {
   test("Should delete a report by ID", async () => {
     //Set
-    let reportID = 277;
+    let reportID = 3;
     let query = `DELETE FROM reports WHERE id = $1`;
     let queryValues = [reportID];
 
@@ -218,7 +203,7 @@ describe("Check whether we can update an report by ID", () => {
   test("Should update a report by ID", async () => {
     //Set
     let newData = {
-      id: 366,
+      id: 7,
       title: "The light is the everything forever.",
       date: "2008-03-27",
       author_id: 1,

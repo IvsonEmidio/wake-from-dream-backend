@@ -23,7 +23,7 @@ export default function reportsRoutes(app: Application) {
     app.get(
         '/report/:id',
         controller.validateParams('get'),
-        controller.getReport.bind(controller)
+        controller.get.bind(controller)
     );
 
     app.delete(

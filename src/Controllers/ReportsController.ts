@@ -70,7 +70,7 @@ export default class ReportsController {
    * @param {Request} req
    * @param {Response} res
    */
-  public async getReport(req: Request, res: Response) {
+  public async get(req: Request, res: Response) {
     try {
       const errors = validationResult(req);
 
@@ -83,7 +83,7 @@ export default class ReportsController {
       }
 
       let reportId = parseInt(req.params.id);
-      let dbOperation = await this.service.getSingleReport(reportId);
+      let dbOperation = await this.service.getFromDatabase(reportId);
       if (dbOperation.success) {
         res.status(200).json({
           status: 1,
@@ -92,7 +92,7 @@ export default class ReportsController {
         });
       } else {
         let errorMsg = dbOperation.errors?.message;
-        let statusCode: number = 500;
+        let statusCode = 500;
         if (
           errorMsg ===
           "The report has not found, please, check the id and try again."
@@ -275,13 +275,13 @@ export default class ReportsController {
 
   public validateParams(method: string): Array<ValidationChain> {
     switch (method) {
-      case "getReport":
+      case 'get':
         return [param("id", "the report id need to be an integer.").isInt()];
-      case "deleteReport":
+      case 'delete':
         return [param("id", "the report id need to be an integer.").isInt()];
-      case "updateReport":
+      case 'update':
         return [param("id", "the report id need to be an integer.").isInt()];
-      case "getAllReports":
+      case 'all':
         return [param("page", "PageNum needs to be an valid integer.").isInt()];
       default:
         return [];
