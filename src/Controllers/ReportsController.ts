@@ -67,8 +67,6 @@ export default class ReportsController {
 
   /**
    * Get a single report details by ID.
-   * @param {Request} req
-   * @param {Response} res
    */
   public async get(req: Request, res: Response) {
     try {
