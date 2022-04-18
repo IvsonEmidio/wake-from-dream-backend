@@ -115,10 +115,8 @@ export default class ReportsController {
 
   /**
    * Delete a single report by ID.
-   * @param {Request} req
-   * @param {Response} res
    */
-  public async deleteReport(req: Request, res: Response) {
+  public async delete(req: Request, res: Response) {
     try {
       let errors = validationResult(req);
       if (!errors.isEmpty()) {
@@ -132,23 +130,23 @@ export default class ReportsController {
       let reportId = parseInt(req.params.id);
       let code: number = 200;
       let message: string = "Successfully deleted the report.";
-      let dbOperation = await this.service.deleteSingleReport(reportId);
-      let { success, found } = dbOperation;
+      let dbOperation = await this.service.deleteFromDatabase(reportId);
+      let { success, errors: operationErrors } = dbOperation;
 
-      if (success) {
-        if (!found) {
+      if (operationErrors) {
+        if (operationErrors.message === "id not found") {
           message =
             "The report id has not encountered, please, check the field 'id' and try again.";
           code = 404;
+        } else {
+          message =
+            "Unfortunately an error has occurred on database, please, try again later.";
+          code = 500;
         }
-      } else {
-        message =
-          "Unfortunately an error has occurred on database, please, try again later.";
-        code = 500;
       }
 
       return res.status(code).json({
-        status: found ? 1 : 0,
+        status: success ? 1 : 0,
         message,
       });
     } catch (err) {

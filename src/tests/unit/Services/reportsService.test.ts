@@ -262,6 +262,34 @@ describe("Reports service class methods", () => {
     expect(t2DbOperation).toStrictEqual(expectedResponse);
     expect(t3DbOperation).toStrictEqual(expectedResponse);
   });
+
+  test("Should delete a report by ID", async () => {
+    //Set
+    let reportID = 3;
+    let query = `DELETE FROM reports WHERE id = $1`;
+    let queryValues = [reportID];
+
+    //Act
+    let response = await pool
+      .query(query, queryValues)
+      .then(() => {
+        return {
+          success: true,
+        };
+      })
+      .catch(() => {
+        return {
+          success: false,
+        };
+      });
+
+    //Assert
+    let expectResponse = {
+      success: true,
+    };
+
+    expect(response).toStrictEqual(expectResponse);
+  });
 });
 
 describe("Check whether we can delete a report by id", () => {

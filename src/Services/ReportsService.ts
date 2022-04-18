@@ -1,4 +1,3 @@
-import { Result } from "express-validator";
 import { allowedEvents } from "../Controllers/ReportsController";
 import pool from "../Database/pool";
 import AmericanStrategy from "../Domain/Strategy/Reports/AmericanStrategy";
@@ -14,7 +13,6 @@ import {
   parseRowObjToResponseObj,
 } from "../Helpers/objectManipulation";
 import {
-  IReportEventsObj,
   IReportItemDetails,
   IReportPostParams,
   IReportUpdateParameters,
@@ -84,10 +82,6 @@ export default class ReportsService {
     }
   }
 
-  /**
-   * Finds an report by ID.
-   * @param {number} id
-   */
   public async getFromDatabase(id: number): Promise<{
     success: boolean;
     data: object | null;
@@ -145,13 +139,9 @@ export default class ReportsService {
     }
   }
 
-  /**
-   * Deletes a single report by ID.
-   * @param {number} id
-   */
-  public async deleteSingleReport(id: number): Promise<{
+  public async deleteFromDatabase(id: number): Promise<{
     success: boolean;
-    found: boolean;
+    errors: { message: string; dbErrors: unknown } | null;
   }> {
     let query = `DELETE FROM reports WHERE id = $1`;
     let queryValues = [id];
@@ -160,31 +150,32 @@ export default class ReportsService {
       .query(query, queryValues)
       .then((result) => {
         let qntRows = result.rowCount;
-
         if (qntRows > 0) {
           return {
             success: true,
-            found: true,
+            errors: null,
           };
         } else {
           return {
-            success: true,
-            found: false,
+            success: false,
+            errors: {
+              message: "id not found",
+              dbErrors: null,
+            },
           };
         }
       })
-      .catch(() => {
+      .catch((err) => {
         return {
           success: false,
-          found: false,
+          errors: {
+            message: "An unknown error has occurred on database",
+            dbErrors: err,
+          },
         };
       });
   }
 
-  /**
-   * Update a single report details
-   * @param {IReportEventsObj} data
-   */
   public async updateOnDatabase(data: IReportUpdateParameters): Promise<{
     success: boolean;
     errors: unknown;
@@ -262,11 +253,6 @@ export default class ReportsService {
     }
   }
 
-  /**
-   * Get all available reports
-   * @param page - Pagination of items per page.
-   * @param itemsPerPage - Amount of items per page
-   */
   public async getAllReports(
     page: number,
     itemsPerPage: number
@@ -319,12 +305,6 @@ export default class ReportsService {
       });
   }
 
-  /**
-   * Get an instance of IReportsStrategy Interface -
-   * according to report category name.
-   * @param {string} category
-   * @returns {object}
-   */
   public getStrategyByCategory(category: string): IReportStrategy {
     switch (category) {
       case "American":
