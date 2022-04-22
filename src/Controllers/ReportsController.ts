@@ -373,7 +373,7 @@ export default class ReportsController {
   }
 }
 
-export const allowedEvents: Array<string> = [
+export const allowedEvents = [
   "lights",
   "out_of_body",
   "seen_spirits",
