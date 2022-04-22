@@ -1,7 +1,6 @@
-import { IReportPostParameters } from "../Interfaces/IReports";
 import IReportStrategy from "./StrategyInterfaces/IReportsStrategy";
 
-export default class Reports {
+export default class ReportsContext {
     reportStrategy: IReportStrategy;
 
     public constructor(reportStrategy: IReportStrategy) {
@@ -10,19 +9,10 @@ export default class Reports {
 
     /**
      * Get all records from an strategy.
-0    * @returns {object}
+     * @returns {object}
      */
     public getReports(): object {
         return this.reportStrategy.getReports();
-    }
-
-    /**
-     * Adds a new record on a strategy.
-     * @param {IReportPostParameters} data 
-     * @returns {object}
-     */
-    public addReport(data: IReportPostParameters): object {
-        return this.reportStrategy.addReport(data);
     }
 
 

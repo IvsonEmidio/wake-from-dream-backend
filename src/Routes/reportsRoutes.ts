@@ -1,64 +1,41 @@
-import { Application, Request, Response, NextFunction } from "express";
+import { Application } from "express";
 import ReportsController from "../Controllers/ReportsController";
-import { body, validationResult } from "express-validator";
 
 /**
- * Routes for /reports endpoint.
- * @param {Express.Application} app 
+ * Routes for /report and /reports endpoint.
+ * @param {Express.Application} app
  */
 export default function reportsRoutes(app: Application) {
-    app.get(
-        "/reports/:category?",
-        (req: Request, res: Response) => {
-            let category = req.params.category;
-            let controller = new ReportsController();
-            let reports = controller.getReportsByCategory(category);
+  const controller = new ReportsController();
 
-            if (reports) {
-                return res.status(200).json(reports);
-            } else {
-                return res.status(500).json({
-                    message: 'An internal error has occurred.'
-                });
-            }
-        }
-    );
+  app.get(
+    "/reports/:page",
+    controller.validateParams("all"),
+    controller.all.bind(controller)
+  );
 
-    app.post(
-        "/report",
-        validatePostBody,
-        (req: Request, res: Response, next: NextFunction) => {
-            //Check middleware errors.
-            let errors = validationResult(req);
-            let qntErrors = errors.array().length;
+  app.post(
+    "/report",
+    controller.validateBody("create"),
+    controller.create.bind(controller)
+  );
 
-            if (qntErrors === 0) {
-                next();
-            } else {
-                return res.status(500).json({
-                    message: 'Check the fields and try again...',
-                })
-            }
-        },
-        (req: Request, res: Response) => {
-            let controller = new ReportsController();
-            let addReport = controller.addReport(req.body);
+  app.get(
+    "/report/:id",
+    controller.validateParams("get"),
+    controller.get.bind(controller)
+  );
 
-            if (addReport) {
-                return res.status(200).json(addReport);
-            }
+  app.delete(
+    "/report/:id",
+    controller.validateParams("delete"),
+    controller.delete.bind(controller)
+  );
 
-            return res.status(500).json({
-                message: 'An internal error has ocurred.'
-            });
-        }
-    );
-
+  app.put(
+    "/report/:id",
+    controller.validateBody("update"),
+    controller.validateParams("update"),
+    controller.update.bind(controller)
+  );
 }
-
-const validatePostBody = [
-    body("title").isString().isLength({ max: 255 }),
-    body("author").isString().isLength({ max: 255 }),
-    body("date").isDate(),
-    body("category").isString()
-];
