@@ -1,2 +1,2 @@
 # wake-from-dream-backend
-Backend api for you understand what real life is based on 'NDE' or 'EQM.
+This projects consists on a robust storage for NDE reports, now are deprectated, since we moving to microservices.
